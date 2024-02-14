@@ -1,44 +1,83 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
     const allUsersBtn = document.getElementById('allUsersBtn');
-    const userList = document.getElementById('userList');
+    const userListDiv = document.getElementById('userList');
 
-    allUsersBtn.addEventListener('click', fetchUsers);
-
-    async function fetchUsers() {
+    // Function to fetch all users from the backend API
+    const fetchAllUsers = async () => {
         try {
-            const response = await fetch('https://jsonplaceholder.typicode.com/users');
-            const users = await response.json();
-            displayUsers(users);
+            const response = await fetch('/api/users');
+            const data = await response.json();
+            displayUsers(data);
         } catch (error) {
             console.error('Error fetching users:', error);
         }
-    }
+    };
 
-    function displayUsers(users) {
-        userList.innerHTML = '';
+    // Function to display users in the UI
+    const displayUsers = (users) => {
+        userListDiv.innerHTML = '';
         users.forEach(user => {
-            const userCard = document.createElement('div');
-            userCard.classList.add('userCard');
-            userCard.innerHTML = `
+            const userDiv = document.createElement('div');
+            userDiv.innerHTML = `
                 <h3>${user.name}</h3>
                 <p>Email: ${user.email}</p>
                 <p>Phone: ${user.phone}</p>
                 <p>Website: ${user.website}</p>
-                <p>City: ${user.address.city}</p>
-                <p>Company: ${user.company.name}</p>
-                <button class="addBtn">Add</button>
-                <button class="openBtn">Open</button>
+                <p>City: ${user.city}</p>
+                <p>Company: ${user.company}</p>
+                <button class="addBtn" data-user='${JSON.stringify(user)}'>Add</button>
+                <button class="openBtn" style="display: none;" data-user='${JSON.stringify(user)}'>Open</button>
             `;
-            userList.appendChild(userCard);
-            const addBtn = userCard.querySelector('.addBtn');
-            const openBtn = userCard.querySelector('.openBtn');
-            addBtn.addEventListener('click', () => addUser(user));
-            openBtn.style.display = 'none'; // Initially hide the "Open" button
+            userListDiv.appendChild(userDiv);
         });
-    }
+    };
 
-    function addUser(user) {
-        // Implement adding user to the database
-        // Show/hide "Add" and "Open" buttons based on database entry
-    }
+    // Function to handle click on Add button
+    const handleAddUser = async (event) => {
+        const user = JSON.parse(event.target.getAttribute('data-user'));
+        try {
+            const response = await fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(user)
+            });
+            const data = await response.json();
+            if (data.message === 'User added successfully') {
+                event.target.style.display = 'none';
+                event.target.nextElementSibling.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error adding user:', error);
+        }
+    };
+
+    // Function to check if user already exists in the UI
+    const isUserExists = (user) => {
+        const existingUsers = document.querySelectorAll('.openBtn');
+        for (const btn of existingUsers) {
+            const existingUser = JSON.parse(btn.getAttribute('data-user'));
+            if (existingUser.email === user.email) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // Event listener for All Users button click
+    allUsersBtn.addEventListener('click', fetchAllUsers);
+
+    // Event listener for Add button click
+    userListDiv.addEventListener('click', (event) => {
+        if (event.target.classList.contains('addBtn')) {
+            const user = JSON.parse(event.target.getAttribute('data-user'));
+            if (!isUserExists(user)) {
+                handleAddUser(event);
+            } else {
+                event.target.style.display = 'none';
+                event.target.nextElementSibling.style.display = 'block';
+            }
+        }
+    });
 });
