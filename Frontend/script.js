@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to fetch all users from the backend API
     const fetchAllUsers = async () => {
         try {
-            const response = await fetch('/api/users');
+            const response = await fetch('https://jsonplaceholder.typicode.com/users');
             const data = await response.json();
             displayUsers(data);
         } catch (error) {
@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>Email: ${user.email}</p>
                 <p>Phone: ${user.phone}</p>
                 <p>Website: ${user.website}</p>
-                <p>City: ${user.city}</p>
-                <p>Company: ${user.company}</p>
+                <p>City: ${user.address.city}</p>
+                <p>Company: ${user.company.name}</p>
                 <button class="addBtn" data-user='${JSON.stringify(user)}'>Add</button>
                 <button class="openBtn" style="display: none;" data-user='${JSON.stringify(user)}'>Open</button>
             `;
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleAddUser = async (event) => {
         const user = JSON.parse(event.target.getAttribute('data-user'));
         try {
-            const response = await fetch('/api/users', {
+            const response = await fetch("/api/users", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -78,6 +78,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 event.target.style.display = 'none';
                 event.target.nextElementSibling.style.display = 'block';
             }
+        }
+    });
+
+    // Event listener for Open button click
+    userListDiv.addEventListener('click', (event) => {
+        if (event.target.classList.contains('openBtn')) {
+            const user = JSON.parse(event.target.getAttribute('data-user'));
+            window.open(`/posts/${user.id}`, '_blank');
         }
     });
 });

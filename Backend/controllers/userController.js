@@ -1,7 +1,5 @@
 const User = require('../models/userModel');
 
-// Controller for handling user-related operations
-
 module.exports = {
   getAllUsers: async (req, res) => {
     try {
@@ -14,9 +12,23 @@ module.exports = {
   },
 
   addUser: async (req, res) => {
+    const userData = req.body; // Assuming the request body contains user data
+    console.log(userData)
     try {
-      const newUser = new User(req.body);
+      // Check if the user already exists in the database
+      const existingUser = await User.findOne({ email: userData.email });
+      if (existingUser) {
+        return res.status(400).json({ error: 'User already exists' });
+      }
+      
+      // Create a new user instance
+      const newUser = new User(userData);
+      console.log(userData)
+      // Save the new user to the database
       await newUser.save();
+      
+      
+      // Respond with success message
       res.json({ message: 'User added successfully' });
     } catch (err) {
       console.error(err);
@@ -24,8 +36,8 @@ module.exports = {
     }
   },
 
+  // Implement other controller methods as needed
 };
-
 
 // userController.js
 
