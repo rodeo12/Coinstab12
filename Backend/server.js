@@ -13,6 +13,10 @@ const app = express();
 app.use(express.json())
 app.use(cors());
 
+app.get("/",(req,res)=>{
+console.log("Welcome to the Backend") ;
+})
+
 
 // Connect to MongoDB
 mongoose.connect(MONGO_URI)
