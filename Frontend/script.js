@@ -35,15 +35,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to handle click on Add button
     const handleAddUser = async (event) => {
         const user = JSON.parse(event.target.getAttribute('data-user'));
+        console.log(user)
         try {
-            const response = await fetch("/api/users", {
+            const response = await fetch("http://localhost:5000/api/users", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(user)
+                
             });
             const data = await response.json();
+            console.log(response,data)
             if (data.message === 'User added successfully') {
                 event.target.style.display = 'none';
                 event.target.nextElementSibling.style.display = 'block';
@@ -70,10 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for Add button click
     userListDiv.addEventListener('click', (event) => {
+        console.log(event)
         if (event.target.classList.contains('addBtn')) {
             const user = JSON.parse(event.target.getAttribute('data-user'));
+            console.log(user)
             if (!isUserExists(user)) {
-                handleAddUser(event);
+                handleAddUser(user);
             } else {
                 event.target.style.display = 'none';
                 event.target.nextElementSibling.style.display = 'block';
